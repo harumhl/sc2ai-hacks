@@ -1,6 +1,8 @@
 # sc2ai-hacks
 A StarCraft 2 AI which uses Google's pysc2 library to send commands to a StarCraft 2 client.
 
+[An introduction to Starcraft 2 and Google's Bot Library.](https://deepmind.com/blog/deepmind-and-blizzard-open-starcraft-ii-ai-research-environment/)
+
 ### Easy Install
 Download and install the following binaries:
 
@@ -29,6 +31,7 @@ The default installation directories are:
 - Update StarCraft
 - Enter `python -m pysc2.bin.agent --map Simple64` into Anaconda Prompt
 
-### Custom Install
+### Additional Information
 
  [Googles SC Python Github](https://github.com/deepmind/pysc2)
+ [Blizzard's API Github](https://github.com/Blizzard/s2client-proto)
