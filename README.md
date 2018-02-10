@@ -34,4 +34,5 @@ The default installation directories are:
 ### Additional Information
 
  [Googles SC Python Github](https://github.com/deepmind/pysc2)
+ 
  [Blizzard's API Github](https://github.com/Blizzard/s2client-proto)
