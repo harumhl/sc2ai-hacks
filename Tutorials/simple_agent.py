@@ -66,7 +66,7 @@ class SimpleAgent(base_agent.BaseAgent):
         if not self.base_top_left:
             return [x - x_distance, y - y_distance]
         return [x + x_distance, y + y_distance]
-
+ 
     # Inherited Functions
     def step(self, obs):
         """ Determines what the agent does each step of game time"""
