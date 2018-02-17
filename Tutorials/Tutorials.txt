@@ -1,0 +1,5 @@
+https://chatbotslife.com/building-a-basic-pysc2-agent-b109cde1477c
+https://chatbotslife.com/building-a-smart-pysc2-agent-cdc269cb095d
+https://itnext.io/add-smart-attacking-to-your-pysc2-agent-17fd5caad578
+https://itnext.io/build-a-sparse-reward-pysc2-agent-a44e94ba5255
+http://chris-chris.ai/2017/08/30/pysc2-tutorial1/
