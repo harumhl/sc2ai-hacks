@@ -1,6 +1,8 @@
+# smart_agent.py
+# Code modified from:
+#     https://chatbotslife.com/building-a-smart-pysc2-agent-cdc269cb095d
 import random
 import math
-
 import numpy as np
 import pandas as pd
 
@@ -63,12 +65,13 @@ class QLearningTable:
         self.epsilon = e_greedy
         self.q_table = pd.DataFrame(columns=self.actions, dtype=np.float64)
 
-    def choose_action(self, observation):
-        self.check_state_exist(observation)
+    def choose_action(self, q_observation):
+        """ Choose action from q learning game state (not google obs)"""
+        self.check_state_exist(q_observation)
 
         if np.random.uniform() < self.epsilon:
             # choose best action
-            state_action = self.q_table.ix[observation, :]
+            state_action = self.q_table.ix[q_observation, :]
 
             # some actions have the same value
             state_action = state_action.reindex(np.random.permutation(state_action.index))
@@ -81,13 +84,23 @@ class QLearningTable:
         return action
 
     def learn(self, s, a, r, s_):
+        """
+        s = previous state
+        a = previous action
+        r = reward
+        s_ = new state
+        """
+        # Add state to table if not already there
         self.check_state_exist(s_)
         self.check_state_exist(s)
 
+        # Get the reward for the previous state and action
         q_predict = self.q_table.ix[s, a]
-        q_target = r + self.gamma * self.q_table.ix[s_, :].max()
-
-        # update
+        # Find the largest reward possible for the previous state
+        max_previous = self.q_table.ix[s_, :].max()
+        # value the present reward more than the reward for the current action
+        q_target = r + self.gamma * max_previous
+        # update the current state with the reward brought by the last action
         self.q_table.ix[s, a] += self.lr * (q_target - q_predict)
 
     def check_state_exist(self, state):
@@ -113,53 +126,7 @@ class SmartAgent(base_agent.BaseAgent):
 
         return [x + x_distance, y + y_distance]
 
-    def step(self, obs):
-        super(SmartAgent, self).step(obs)
-
-        player_y, player_x = (obs.observation['minimap'][_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
-        self.base_top_left = 1 if player_y.any() and player_y.mean() <= 31 else 0
-
-        unit_type = obs.observation['screen'][_UNIT_TYPE]
-
-        # Make game state understandable for the Q-Learning Algorithm
-        depot_y, depot_x = (unit_type == _TERRAN_SUPPLY_DEPOT).nonzero()
-        supply_depot_count = supply_depot_count = 1 if depot_y.any() else 0
-
-        barracks_y, barracks_x = (unit_type == _TERRAN_BARRACKS).nonzero()
-        barracks_count = 1 if barracks_y.any() else 0
-
-        supply_limit = obs.observation['player'][4]
-        army_supply = obs.observation['player'][5]
-
-        killed_unit_score = obs.observation['score_cumulative'][5]
-        killed_building_score = obs.observation['score_cumulative'][6]
-
-        current_state = [
-            supply_depot_count,
-            barracks_count,
-            supply_limit,
-            army_supply,
-        ]
-
-        if self.previous_action is not None:
-            reward = 0
-
-            if killed_unit_score > self.previous_killed_unit_score:
-                reward += KILL_UNIT_REWARD
-
-            if killed_building_score > self.previous_killed_building_score:
-                reward += KILL_BUILDING_REWARD
-
-            self.qlearn.learn(str(self.previous_state), self.previous_action, reward, str(current_state))
-
-        rl_action = self.qlearn.choose_action(str(current_state))
-        smart_action = smart_actions[rl_action]
-
-        self.previous_killed_unit_score = killed_unit_score
-        self.previous_killed_building_score = killed_building_score
-        self.previous_state = current_state
-        self.previous_action = rl_action
-
+    def execute_action(smart_action):
         if smart_action == ACTION_DO_NOTHING:
             return actions.FunctionCall(_NO_OP, [])
 
@@ -217,4 +184,57 @@ class SmartAgent(base_agent.BaseAgent):
 
                 return actions.FunctionCall(_ATTACK_MINIMAP, [_NOT_QUEUED, [21, 24]])
 
+    def get_game_state(obs):
+        unit_type = obs.observation['screen'][_UNIT_TYPE]
+        depot_y, depot_x = (unit_type == _TERRAN_SUPPLY_DEPOT).nonzero()
+        supply_depot_count = supply_depot_count = 1 if depot_y.any() else 0
+
+        barracks_y, barracks_x = (unit_type == _TERRAN_BARRACKS).nonzero()
+        barracks_count = 1 if barracks_y.any() else 0
+
+        supply_limit = obs.observation['player'][4]
+        army_supply = obs.observation['player'][5]
+
+        return [
+            supply_depot_count,
+            barracks_count,
+            supply_limit,
+            army_supply,
+        ]
+
+    def step(self, obs):
+        super(SmartAgent, self).step(obs)
+
+        # Find base location
+        player_y, player_x = (obs.observation['minimap'][_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
+        self.base_top_left = 1 if player_y.any() and player_y.mean() <= 31 else 0
+
+        # Highlight import game state measures for the Q-Learning Algorithm
+        current_state = get_game_state(obs)
+        killed_unit_score = obs.observation['score_cumulative'][5]
+        killed_building_score = obs.observation['score_cumulative'][6]
+
+        # Learn what action was useful if an enemy unit was killed
+        if self.previous_action is not None:
+            reward = 0
+
+            if killed_unit_score > self.previous_killed_unit_score:
+                reward += KILL_UNIT_REWARD
+
+            if killed_building_score > self.previous_killed_building_score:
+                reward += KILL_BUILDING_REWARD
+
+            self.qlearn.learn(str(self.previous_state), self.previous_action, reward, str(current_state))
+
+        # Pick an action based on the current state
+        rl_action = self.qlearn.choose_action(str(current_state))
+        smart_action = smart_actions[rl_action]
+
+        # Remember what the game state looked like before applying an action
+        self.previous_killed_unit_score = killed_unit_score
+        self.previous_killed_building_score = killed_building_score
+        self.previous_state = current_state
+        self.previous_action = rl_action
+
+        execute_action(smart_action)
         return actions.FunctionCall(_NO_OP, [])
