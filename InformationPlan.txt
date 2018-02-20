@@ -1,0 +1,23 @@
+What is the minimum information needed to play StarCraft 2 fully?
+Note: Most of these variables can be found in the obs variable passed into the agent
+
+Time Management: Minerals
+Time Management: Gas
+Time Management: Supply Limit
+Time Management: Army Supply Need
+Time Management: What's in the Queue
+
+Defense/Micro: Whether (and where) we're being attacked (How??? - unit health)
+Defense/Micro: Our Approximate unit locations and number units
+
+Offense/Micro: Number of each type of unit we have
+Offense/Micro: Approximate enemy unit location & number of seen units
+Offense/Micro: Approximate enemy building locations (4x4 grid???)
+Offense/Micro: Killed unit count and killed building count
+Offense/Micro: Next Unit and time till training complete
+
+Tech Tree: Count of each building type built
+
+Scouting: Types of buildings/units seen from the enemy
+
+Research: Count of each research type
