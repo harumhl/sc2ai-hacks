@@ -1,0 +1,52 @@
+Basic (Running the agent)
+$ python -m pysc2.bin.agent --map Simple64
+
+
+Help
+$ python -m pysc2.bin.agent --help
+
+
+(While in Tutorial folder on Terminal - cd sc2ai-hacks/Tutorials) 
+Terran agent, with SimpleAgent class, 
+render less often to speed up the training (step_mul can be increased even more)
+$ python -m pysc2.bin.agent --map Simple64 --agent_race T --agent simple_agent.SimpleAgent --step_mul 5000
+
+
+
+
+
+
+
+
+  --agent: Which agent to run
+    (default: 'pysc2.agents.random_agent.RandomAgent')
+  --agent_race: <P|Z|R|T>: Agent's race.
+  --bot_race: <P|Z|R|T>: Bot's race.
+  --difficulty: <1|A|3|2|5|4|7|6|9|8>: Bot's strength.
+  --game_steps_per_episode: Game steps per episode.
+    (default: '0')
+    (an integer)
+  --map: Name of a map to use.
+  --max_agent_steps: Total agent steps.
+    (default: '2500')
+    (an integer)
+  --minimap_resolution: Resolution for minimap feature layers.
+    (default: '64')
+    (an integer)
+  --parallel: How many instances to run in parallel.
+    (default: '1')
+    (an integer)
+  --[no]profile: Whether to turn on code profiling.
+    (default: 'false')
+  --[no]render: Whether to render with pygame.
+    (default: 'true')
+  --[no]save_replay: Whether to save a replay at the end.
+    (default: 'true')
+  --screen_resolution: Resolution for screen feature layers.
+    (default: '84')
+    (an integer)
+  --step_mul: Game steps per agent step.
+    (default: '8')
+    (an integer)
+  --[no]trace: Whether to trace the code execution.
+    (default: 'false')
